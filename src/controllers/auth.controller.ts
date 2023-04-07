@@ -2,6 +2,10 @@ import * as express from 'express';
 import { Request, Response} from 'express';
 import { body, validationResult } from 'express-validator';
 
+
+import CognitoService from '../services/cognito.service';
+
+
 class AuthController {
     public path = '/auth';
     public router = express.Router();
@@ -23,13 +27,36 @@ class AuthController {
     signUp = (req: Request, res: Response)  => {
 
         const result = validationResult(req);
+        console.log(req.body)
         if(!result.isEmpty()){
             return res.status(422).json({errors: result.array()})
         }
-        return res.status(200).json({message: 'success'}).end();
+        //extract the body.
+        const {username, password, email, birthday, name, family_name} = req.body;
+        //create the user attributes.
+        //name
+        //family_name
+        //email
+        //birthdate
+        const userAttr = [];
+        userAttr.push({Name: 'name', Value: name});
+        userAttr.push({Name: 'family_name', Value: family_name});
+        userAttr.push({Name: 'email', Value: email});
+        userAttr.push({Name: 'birthdate', Value: birthday});
+        //Cognito
+        const cognito = new CognitoService();
+        let success = cognito.signUp(username, password, userAttr)
+            .then(success => {
+                if(success){
+                    return res.status(200).json({message: 'success'}).end();
+                }else{
+                    return res.status(500).json({message: 'failed'}).end();
+                }
+            });
     }
     signIn = (req: Request, res: Response) => {
         const result = validationResult(req);
+        console.log(req.body)
         if(!result.isEmpty()){
             return res.status(422).json({errors: result.array()})
         }
@@ -38,6 +65,7 @@ class AuthController {
     verify = (req: Request, res: Response) => {
         //check if iit passes validation.
         const result = validationResult(req);
+        console.log(req.body)
         if(!result.isEmpty()){
             return res.status(422).json({errors: result.array()})
         }
