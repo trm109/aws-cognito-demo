@@ -4,7 +4,7 @@ import { body, validationResult } from 'express-validator';
 
 
 import CognitoService from '../services/cognito.service';
-
+import RDSService from 'services/rds.service';
 //Publically accessible.
 //"Doorway" to getting COGNITO access.
 class AuthController {
@@ -25,7 +25,7 @@ class AuthController {
         this.router.post(`/verify`, this.validateBody('verify'), this.verify);
     }
 
-    signUp = (req: Request, res: Response)  => {
+    signUp = async (req: Request, res: Response)  => {
 
         const result = validationResult(req);
         console.log(req.body)
@@ -46,14 +46,16 @@ class AuthController {
         userAttr.push({Name: 'birthdate', Value: birthday});
         //Cognito
         const cognito = new CognitoService();
-        let success = cognito.signUp(username, password, userAttr)
-            .then(success => {
-                if(success){
-                    return res.status(200).json({message: 'success'}).end();
-                }else{
-                    return res.status(500).json({message: 'failed'}).end();
-                }
-            });
+        let cognito_success = await cognito.signUp(username, password, userAttr);
+        if(!cognito_success){
+            return res.status(500).json({message: 'failed @ cognito'}).end();
+        }
+        const rds = new RDSService();
+        let rds_success = await rds.createUser(username);
+        if(!rds_success){
+            return res.status(500).json({message: 'failed @ rds'}).end();
+        }
+        return res.status(200).json({message: 'success'}).end();
     }
     signIn = (req: Request, res: Response) => {
         const result = validationResult(req);
