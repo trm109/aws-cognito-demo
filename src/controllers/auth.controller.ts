@@ -5,7 +5,8 @@ import { body, validationResult } from 'express-validator';
 
 import CognitoService from '../services/cognito.service';
 
-
+//Publically accessible.
+//"Doorway" to getting COGNITO access.
 class AuthController {
     public path = '/auth';
     public router = express.Router();
@@ -60,7 +61,16 @@ class AuthController {
         if(!result.isEmpty()){
             return res.status(422).json({errors: result.array()})
         }
-        return res.status(200).json({message: 'success'}).end();
+        const {username, password} = req.body;
+        const cognito = new CognitoService();
+        let success = cognito.signIn(username, password)
+            .then(success => {
+                if(success){
+                    return res.status(200).json({message: 'success'}).end();
+                }else{
+                    return res.status(500).json({message: 'failed'}).end();
+                }
+            });
     }
     verify = (req: Request, res: Response) => {
         //check if iit passes validation.
@@ -69,7 +79,16 @@ class AuthController {
         if(!result.isEmpty()){
             return res.status(422).json({errors: result.array()})
         }
-        return res.status(200).json({message: 'success'}).end();
+        const {username, code} = req.body;
+        const cognito = new CognitoService();
+        let success = cognito.verify(username, code)
+            .then(success => {
+                if(success){
+                    return res.status(200).json({message: 'success'}).end();
+                }else{
+                    return res.status(500).json({message: 'failed'}).end();
+                }
+            })
     }
 
     private validateBody(type: string){

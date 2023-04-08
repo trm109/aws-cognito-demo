@@ -1,5 +1,6 @@
 import express, { Request, Response} from 'express';
 
+//Publically accessible.
 class HomeController {
     public path = '/';
     public router = express.Router();
@@ -10,7 +11,8 @@ class HomeController {
 
     public initializeRoutes() {
         //Get response for this.path for resource this.index.
-        this.router.get(this.path, this.index);
+        // / returns => index.
+        this.router.get('', this.index);
     }
 
     index = (request: Request, response: Response) => {

@@ -1,6 +1,10 @@
 import express from 'express';
 import { Application } from 'express';
 
+
+
+import fileUpload from 'express-fileupload';
+
 class App {
     public app: Application;
     public port: number;
@@ -8,6 +12,7 @@ class App {
     constructor(appInit: {port:number, middlewares: any, controllers: any}) {
         this.app = express();
         this.port = appInit.port;
+        this.app.use(fileUpload());
         //applies any middleware declared in server.ts
         this.middlewares(appInit.middlewares);
         //applies any controller declared in server.ts

@@ -1,17 +1,21 @@
 import App from './app';
 import bodyParser from 'body-parser';
 
-//Controll for Home Controller
+//Control for Home Controller
 import HomeController from './controllers/home.controller';
-//Controll for Auth Controller
+//Control for Auth Controller
 import AuthController from './controllers/auth.controller';
-
-
+//Control for Protected Controller
+import ProtectedController from './controllers/protected.controller';
+//Control for CDN Controller
+import CDNController from './controllers/cdn.controller';
 const app = new App({
     port: 3000,
     controllers: [
         new HomeController(),
         new AuthController(),
+        new ProtectedController(),
+        new CDNController(),
     ],
     middlewares: [
         bodyParser.json(),
